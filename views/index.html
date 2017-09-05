@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>主页</title>
+        <link rel='stylesheet' href='/stylesheets/index.css'/>
+    </head>
+    <body>
+      <div class="header" >
+        <div>信息管理</div>
+      </div>
+      <div class="btn">
+         <button type="button" class="" onclick="enterEditProject()"> 添加项目</button>
+      </div>
+      <div class="btn">
+        <button type="button" onclick="enterEditUser()">添加用户</button>
+      </div>
+      <div class="btn">
+        <button type="button" onclick="enterProject()">项目信息</button>
+      </div>
+      <div class="btn">
+        <button type="button" onclick="enterUser()">用户信息</button>
+      </div>
+      <script>
+        function enterEditUser() {
+          window.location.href = 'editUser.html';
+        }
+        function enterEditProject() {
+          window.location.href = 'editProject.html';
+        }
+        function enterProject() {
+          window.location.href = 'project.html';
+        }
+        function enterUser() {
+            window.location.href = 'user.html';
+        }
+
+      </script>
+
+    </body>
+</html>

@@ -1,0 +1,114 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Sample Page</title>
+        <link rel="stylesheet" href="/stylesheets/editUser.css">
+    </head>
+    <body>
+      <div class="container">
+
+        <div class="cell">
+          <div class="text">项目名称:</div>
+          <input class="inputContent" id="projectName" type="text" placeholder="请输入项目名称" ／>
+        </div>
+
+        <div class="cell">
+          <a class="text">基金名称:</a>
+          <input class="inputContent" id="fundName" type="text" placeholder="请输入基金名称" />
+        </div>
+
+        <div class="cell">
+          <a class="text">银行账户:</a>
+          <input class="inputContent" id="bankAccount" type="text" placeholder="请输入银行账户" onKeyUp="value=value.replace(/[^\d]/g,'')"/>
+        </div>
+
+        <div class="cell">
+          <a class="text">打款日期:</a>
+          <input class="inputContent" id="remitDate" type="date" />
+        </div>
+
+        <div class="cell">
+          <a class="text">募集截至日期:</a>
+          <input class="inputContent" id="limitedDate" type="date" placeholder="募集截至日期" onKeyUp="value=value.replace(/[^\d]/g,'')"/>
+        </div>
+        <div class="cell">
+          <a class="text">总规模:</a>
+          <input class="inputContent" id="totalScale" type="text" placeholder="总规模"  />
+        </div>
+        <!-- <div class="cell">
+          <div class="text">姓名:</div>
+          <input class="inputContent" id="name1" type="text" placeholder="请输入姓名" ／>
+        </div>
+
+        <div class="cell">
+          <a class="text">项目名称:</a>
+          <input class="inputContent" id="name2" type="text" placeholder="请输入项目名称" />
+        </div>
+
+        <div class="cell">
+          <a class="text">投资总额:</a>
+          <input class="inputContent" id="name3" type="text" placeholder="请输入金额" onKeyUp="value=value.replace(/[^\d]/g,'')"/>
+        </div>
+
+        <div class="cell">
+          <a class="text">是否员工跟投:</a>
+          <div class="singleRadio">
+            <label>
+              <input name="inputContent" id="name4" type="radio" value="yes" checked/>
+              是
+            </label>
+            <label>
+              <input name="inputContent" id="name5" type="radio" value="no"／>
+              否
+            </label>
+          </div>
+        </div> -->
+        <div class="buttons">
+          <div class="btn">
+             <button type="button" onclick="reset()" class="">重置</button>
+          </div>
+          <div class="btn">
+             <button type="button" onclick="submit()" class="">提交</button>
+          </div>
+        </div>
+    </div>
+
+<script src="/javascripts/jquery.min.js"></script>
+
+    <script>
+      function submit(){
+        var project = {};
+        var inputs = Array.from( document.getElementsByClassName('inputContent'));
+        inputs.map((item)=>{
+          console.log(item.value);
+          project[item.id] = item.value;
+        })
+        if (project) {
+          let xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = function() {
+              switch(xhr.readyState) {
+                 case 4 :
+                     if((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
+                         var data = xhr.responseText;
+                        alert('添加成功');
+                        window.history.back();
+                    }else {
+                       alert("Request was unsuccessful : " + xhr.status + " " + xhr.statusText);
+                    }
+                    break;
+              }
+          };
+          xhr.open("post", 'http://localhost:3000/api/projects', true);
+          xhr.setRequestHeader("Content-Type","application/json");
+        //   var data = new FormData();
+        //   for(var attr in project) {
+        //       data.append(attr,project[attr]);
+        //  }
+          xhr.send(JSON.stringify(project) );
+        }
+      }
+
+    </script>
+
+    </body>
+</html>

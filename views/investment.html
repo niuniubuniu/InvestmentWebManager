@@ -1,0 +1,159 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Sample Page</title>
+        <link rel="stylesheet" href="/stylesheets/editUser.css">
+    </head>
+    <body>
+      <div class="container">
+        <div class="cell">
+           <div class="text">姓名:</div>
+            <select class="user_select" onchange="selectUser(this)">
+                <option value ="" >选择用户</option>
+            </select>
+        </div>
+        <div class="cell">
+          <a class="text">身份证:</a>
+          <span id='Id_Number'> 身份证</span>
+        </div>
+        <div class="cell">
+          <a class="text">电子邮件:</a>
+          <span id="email"> 电子邮件</span>
+        </div>
+        <div class="cell">
+          <a class="text">电话:</a>
+           <span id="phoneNumber"> 电话</span>
+        </div>
+        <div class="cell">
+          <a class="text">微信:</a>
+          <span id="wechatNumber"> 微信</span>
+        </div>
+        <div class="cell">
+          <a class="text">住址:</a>
+          <span id="address"> 住址</span>
+        </div>
+
+        <div class="cell">
+          <a class="text">打款日期:</a>
+          <input class="inputContent" id="remitDate" type="date" />
+        </div>
+
+        <div class="cell">
+          <a class="text">投资额:</a>
+          <input class="inputContent" id="investmentMmount" type="text" placeholder="请输入金额" />
+        </div>
+        <div class="cell">
+          <a class="text">介绍人:</a>
+          <input class="inputContent" id="introducer" type="text" placeholder="请输入介绍人" />
+        </div>
+        <div class="cell">
+          <a class="text">备注:</a>
+          <input class="inputContent" id="extra" type="text" placeholder="备注" />
+        </div>
+        <div class="buttons">
+          <div class="btn">
+             <button type="button" onclick="reset()" class="">重置</button>
+          </div>
+          <div class="btn">
+             <button type="button" onclick="submit()" class="">提交</button>
+          </div>
+        </div>
+    </div>
+
+<script src="/javascripts/jquery.min.js"></script>
+
+<script>
+      function reset() {
+
+      }
+
+      function selectUser(selectDom){
+           this.selectedUser = {};
+           this.userId = $(selectDom).children('option:selected').val();
+           this.users.map((item)=>{
+               if (item._id == this.userId) {
+                    this.selectedUser = item;
+               }
+           })
+           Object.keys(this.selectedUser).map((item)=>{
+               $("span").map((index, dom)=>{
+                   if (dom.id ==  item) {
+                       let ele =  document.getElementById(item);
+                       ele && (ele.innerText = selectedUser[item])
+                   }
+               })
+           })
+
+      }
+
+      function createUserOption(users) {
+          var html = '';
+          users.map((item)=>{
+             html+= ('<option value ="'+item._id+'" >'+ item.name +'</option>');
+          })
+          document.getElementsByClassName('user_select')[0].innerHTML += html;
+
+
+      }
+
+      function getUserList() {
+          $.ajax({
+            type: "GET",
+            url: "http://localhost:3000/user/user",
+            complete:function(XMLHttpRequest, textStatus){
+
+            },
+            success:(data,textStatus)=>{
+                  if (data.status) {
+                      var users = data.data;
+                      this.users = users;
+                      createUserOption(users)
+                  }
+
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown){
+            }
+        });
+
+      }
+      getUserList()
+
+      function submit(){
+        var extra = document.getElementById('extra').value;
+        var investmentMmount = document.getElementById('investmentMmount').value;
+        var introducer = document.getElementById('introducer').value;
+        var projectId = window.location.search.split("?")[1].split("=")[1];
+        var project = {projectId, userId: this.userId ,userName: this.selectedUser.name, investmentMmount, introducer,extra};
+        var inputs = Array.from( document.getElementsByClassName('inputContent'));
+        inputs.map((item)=>{
+          console.log(item.value);
+          project[item.id] = item.value;
+        })
+        if (project) {
+            $.ajax({
+              type: "POST",
+              url: "http://localhost:3000/investment/investment",
+              data:project,
+              dataType: "json",
+              complete:function(XMLHttpRequest, textStatus){
+
+              },
+              success: function(data,textStatus){
+                    if (data.status) {
+                          var data = data.data;
+                          alert('添加成功');
+                          window.history.back()
+                    }
+
+              },
+              error: function(XMLHttpRequest, textStatus, errorThrown){
+              }
+          });
+
+        }
+      }
+
+    </script>
+
+    </body>
+</html>

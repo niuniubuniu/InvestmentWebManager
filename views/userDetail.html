@@ -1,0 +1,182 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>已加入的项目</title>
+        <link rel="stylesheet" href="/stylesheets/editUser.css">
+    </head>
+    <body>
+        <div class="header" >
+          <div>用户主页</div>
+        </div>
+      <div class="container">
+
+      </div>
+
+<script src="/javascripts/jquery.min.js"></script>
+<script>
+    getInvestment()
+
+    function getInvestment(){
+        var userId = window.location.search.split("?")[1].split("=")[1];
+
+        $.ajax({
+    		type: "GET",
+    		url: "http://localhost:3000/user/user?_id="+ userId,
+    		complete:function(XMLHttpRequest, textStatus){ },
+    		success: function(data,textStatus){
+                if (data.status) {
+                    var userInfo = data.data;
+                    createUserInfoHtml(userInfo)
+                }
+    		},
+    		error: function(XMLHttpRequest, textStatus, errorThrown){ }
+    	});
+
+        $.ajax({
+    		type: "GET",
+    		url: "http://localhost:3000/investment/getInvestmentProject?userId="+ userId,
+    		complete:function(XMLHttpRequest, textStatus){ },
+    		success: function(data,textStatus){
+                if (data.status) {
+                    var investment = data.data;
+                    createInvestmentHtml(investment)
+                }
+    		},
+    		error: function(XMLHttpRequest, textStatus, errorThrown){ }
+    	});
+    }
+
+    function createUserInfoHtml(inputData) {
+        if (inputData && inputData.length) {
+            var data = inputData[0];
+            var projectHtml = (
+                '<div> <font >----个人资料----</font> </div>' +
+                '<div style="display:flex; align-items: center" >'+
+                    '<div class="text" id="projectName" style="height:25px"> 姓名：'+ data.name +'</div>' +
+                    '<div class="text" id="fundName" style="height:25px">身份证号：'+ data.Id_Number +'</div>'+
+                    '<div class="text" id="remitDate" style="height:25px">地址：'+ data.address +'</div>'+
+                    '<div class="text" id="totalScale" style="height:25px">手机号：'+ data.phoneNumber +'</div>'+
+                    '<div class="text" id="totalScale" style="height:25px"> 微信号：'+ data.wechatNumber +'w</div>'+
+                '</div>'
+            )
+
+        document.getElementsByClassName("container")[0].innerHTML += projectHtml;
+        }
+
+    }
+
+    function createInvestmentHtml (inputData){
+        var projectHtml = '<div> <font >----已投项目----</font> </div>' +
+        '  <div style="display:flex;">'+
+        ' <div class="text" id="name" style="height:25px; flex:1"> 项目名 </div>'+
+        '<div class="text" id="Id_Number"  style="height:25px; flex:1"> 基金名 </div>'+
+        '<div class="text" id="email"  style="height:25px; flex:1">  开始日期</div>'+
+        '<div class="text" id="phoneNumber" style="height:25px; flex:1"> 截至日期</div>'+
+        '<div class="text" id="wechatNumber"  style="height:25px; flex:1">  目标金额</div>'+
+        '<div class="text" id="address"  style="height:25px; flex:1"> 投资额 </div>'+
+        '<div class="text" id="address"  style="height:25px; flex:1">  打款时间</div>'+
+        '</div>';
+        ;
+        inputData.map((item, index)=>{
+            projectHtml += (
+                '<div style="display:flex; align-items: center" >'+
+                    '<div class="text" id="projectName" data-item='+item._id+' style="height:25px">'+ item.projectName +'</div>' +
+                    '<div class="text" id="fundName" style="height:25px">'+ item.fundName +'</div>'+
+                    '<div class="text" id="remitDate" style="height:25px">'+ item.remitDate +'</div>'+
+                    '<div class="text" id="limitedDate" style="height:25px">'+ item.limitedDate +'</div>'+
+                    '<div class="text" id="totalScale" style="height:25px">'+ item.totalScale +'w</div>'+
+                    '<div class="text" id="totalScale" style="height:25px"> '+ item.investmentMmount +'w</div>'+
+                    '<div class="text" id="totalScale" style="height:25px"> '+ item.remitDate +'w</div>'+
+                '</div>'
+            )
+            ;
+        })
+        document.getElementsByClassName("container")[0].innerHTML += projectHtml;
+    }
+
+    function showUsers(obj){
+        var _id = obj.getAttribute('data-item');
+        requestUsers(_id)
+    }
+    function enterEditUser(obj) {
+        window.location.href = "investment.html?_id=" + obj.id;
+    }
+
+    function requestUsers(id){
+        $.ajax({
+          type: "GET",
+          url: "http://localhost:3000/investment/getInvestmentProject?projectId=" + id,
+          complete:function(XMLHttpRequest, textStatus){
+
+          },
+          success:(data,textStatus)=>{
+                if (data.status) {
+                    var investments = data.data;
+                    this.investments = investments;
+                    createUserlist(investments)
+                }
+
+          },
+          error: function(XMLHttpRequest, textStatus, errorThrown){
+          }
+      });
+    }
+
+    function createUserlist(investments) {
+        // var dom = document.getElementById("user_" + investments[0]._id);
+        // if(dom){
+        //     dom.remove()
+        // }else{
+            var html='';
+            investments.map((investment )=>{
+                var dom = document.getElementById("user_" + investment._id);
+                if (dom) {
+                    dom.remove()
+                }else{
+                    document.getElementById(investments[0].projectId).innerHTML += (
+                        '<div id='+ "user_" +investment._id+' style="display: flex; justify-content: center">'+
+                            '<div style="flex:1">   </div>'+
+                            '<div style="flex:1" class="userName" data-UserId='+investment.userId+' onclick="enterUserDetail(this)"> '+ investment.userName +' </div>'+
+                            '<div style="flex:1"class="userName"> '+ investment.investmentMmount +' </div>'+
+                            '<div style="flex:1"class="userName"> '+ investment.remitDate +' </div>'+
+                        '</div>'
+                    )
+                }
+            })
+    }
+
+      function submit(){
+        var project = {};
+        var inputs = Array.from( document.getElementsByClassName('inputContent'));
+        inputs.map((item)=>{
+          console.log(item.value);
+          project[item.id] = item.value;
+        })
+        if (project) {
+          let xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = function() {
+              switch(xhr.readyState) {
+                 case 4 :
+                     if((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
+                         var data = xhr.responseText;
+                        alert(data);
+                    }else {
+                       alert("Request was unsuccessful : " + xhr.status + " " + xhr.statusText);
+                    }
+                    break;
+              }
+          };
+          xhr.open("post", 'http://localhost:3000/api/projects', true);
+          xhr.setRequestHeader("Content-Type","application/json");
+        //   var data = new FormData();
+        //   for(var attr in project) {
+        //       data.append(attr,project[attr]);
+        //  }
+          xhr.send(JSON.stringify(project) );
+        }
+      }
+
+    </script>
+
+    </body>
+</html>

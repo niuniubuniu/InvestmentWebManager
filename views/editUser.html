@@ -1,0 +1,109 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Sample Page</title>
+        <link rel="stylesheet" href="/stylesheets/editUser.css">
+    </head>
+    <body>
+      <div class="container">
+
+        <div class="cell">
+          <div class="text">姓名:</div>
+          <input class="inputContent" id="name" type="text" placeholder="请输入姓名" />
+        </div>
+
+        <div class="cell">
+          <a class="text">身份证:</a>
+          <input class="inputContent" id="Id_Number" type="text" placeholder="请输入身份证号" />
+        </div>
+        <div class="cell">
+          <a class="text">电子邮件:</a>
+          <input class="inputContent" id="email" type="text" placeholder="请输入电子邮件" />
+        </div>
+        <div class="cell">
+          <a class="text">电话:</a>
+          <input class="inputContent" id="phoneNumber" type="text" placeholder="请输入电话" onKeyUp="value=value.replace(/[^\d]/g,'')"/>
+        </div>
+        <div class="cell">
+          <a class="text">微信:</a>
+          <input class="inputContent" id="wechatNumber" type="text" placeholder="请输入微信号" />
+        </div>
+        <div class="cell">
+          <a class="text">住址:</a>
+          <input class="inputContent" id="address" type="text" placeholder="请输入住址"  />
+        </div>
+
+        <div class="cell">
+          <a class="text">员工:</a>
+          <div class="singleRadio">
+            <label>
+              <input name="inputContent" class="checkBox" id="isNotStaff" type="radio" value=0 checked/>
+              否
+            </label>
+            <label>
+              <input name="inputContent"  class="checkBox" id="isStaff" type="radio" value=1／>
+              是
+            </label>
+          </div>
+        </div>
+        <div class="buttons">
+          <div class="btn">
+             <button type="button" onclick="reset()" class="">重置</button>
+          </div>
+          <div class="btn">
+             <button type="button" onclick="submit()" class="">提交</button>
+          </div>
+        </div>
+    </div>
+    <script src="/javascripts/jquery.min.js"></script>
+
+      <script>
+        // function selectUser(selectDom){
+        //      var userId = $(selectDom).children('option:selected').val();
+        //      <select class="user_select" onchange="selectUser(this)">
+        //          <option value ="" >用户</option>
+        //      </select>
+        // }
+        function submit(){
+            var user={} ;
+          var inputs = Array.from( document.getElementsByClassName('inputContent'));
+          inputs.map((item)=>{
+            user[item.id] = item.value;
+          })
+          var checkBox = Array.from( document.getElementsByClassName('checkBox'));
+          checkBox.map((item)=>{
+              item.checked && console.log('isStaff',item.value);
+              if (item.checked ) {
+                  user.isStaff = (item.value == "0") ? 0 : 1;
+              }
+          })
+
+          //上传userInfo
+          if (user) {
+
+              let xhr = new XMLHttpRequest();
+              xhr.onreadystatechange = function() {
+                  switch(xhr.readyState) {
+                     case 4 :
+                         if((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
+                             var data = JSON.parse( xhr.responseText);
+                            alert(data.data.message);
+                            window.history.back()
+                        }else {
+                           alert("Request was unsuccessful : " + xhr.status + " " + xhr.statusText);
+                        }
+                        break;
+                  }
+              };
+              xhr.open("post", 'http://localhost:3000/user/user', true);
+              xhr.setRequestHeader("Content-Type","application/json");
+
+              xhr.send(JSON.stringify(user) );
+        }
+
+        }
+
+      </script>
+
+    </body>
+</html>

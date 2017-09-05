@@ -1,0 +1,217 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>项目</title>
+        <link rel="stylesheet" href="/stylesheets/editUser.css">
+    </head>
+    <body>
+        <button onclick="downloadProject()" style="height:25px; margin:5"> 下载excel  </button>
+
+      <div class="container">
+
+    </div>
+
+<script src="/javascripts/jquery.min.js"></script>
+<script>
+    function downloadProject() {
+        window.open("http://localhost:3000/investment/download")
+    }
+
+    function getProjects(query){
+        $.ajax({
+    		type: "GET",
+    		url: "http://localhost:3000/api/projects",
+    		complete:function(XMLHttpRequest, textStatus){
+
+    		},
+    		success: function(data,textStatus){
+                if (data.status) {
+                    var projectData = data.data;
+                    createProjectHtml(projectData)
+                }
+
+    		},
+    		error: function(XMLHttpRequest, textStatus, errorThrown){
+    		}
+    	});
+    }
+
+    function createProjectHtml (inputData){
+        var projectHtml =  '  <div style="display:flex;">'+
+        ' <div class="text" id="name" style="height:25px; flex:1"> 项目名 </div>'+
+        '<div class="text" id="Id_Number"  style="height:25px; flex:1"> 基金名 </div>'+
+        '<div class="text" id="email"  style="height:25px; flex:1">  开始日期</div>'+
+        '<div class="text" id="phoneNumber" style="height:25px; flex:1"> 截至日期</div>'+
+        '<div class="text" id="wechatNumber"  style="height:25px; flex:1">  目标金额</div>'+
+        '<div class="text" id="address"  style="height:25px; flex:1">  </div>'+
+        '</div>';
+        inputData.map((item, index)=>{
+            projectHtml += (
+            '<div  style=" border:1px solid gray; margin: 10px"  id='+item._id+' >' +
+                '<div style="display:flex; border:1px solid gray ; align-items: center" >'+
+                    '<div class="text" id="projectName" data-item='+item._id+' onclick="showUsers(this)" style="height:25px"><font color=blue>'+ item.projectName +'</font></div>' +
+                    '<div class="text" id="fundName"  style="height:25px">'+ item.fundName +'</div>'+
+                    '<div class="text" id="remitDate"  style="height:25px">'+ item.remitDate +'</div>'+
+                    '<div class="text" id="limitedDate"  style="height:25px">'+ item.limitedDate +'</div>'+
+                    '<div class="text" id="totalScale"  style="height:25px">'+ item.totalScale +'w</div>'+
+                    '<button class="text" id='+item._id +' onclick="deleteProject(this)" style="height:25px; margin:5">'+ "删除项目" +'</button>'+
+                    '<button class="text" id='+item._id +' onclick="enterEditUser(this)" style="height:25px; margin:5">'+ "添加投资者" +'</button>'+
+                '</div>'+
+            '</div>'
+            )
+            ;
+        })
+        document.getElementsByClassName("container")[0].innerHTML = projectHtml;
+    }
+
+    function deleteProject(obj) {
+        $.ajax({
+          type: "DELETE",
+          url: "http://localhost:3000/api/projects?_id=" + obj.id,
+          success:(data,textStatus)=>{
+                if (data.status) {
+                    removeProjectDom(obj.id)
+                    deleteInvestmentByProjectId(obj.id)
+                }
+          },
+          error: function(XMLHttpRequest, textStatus, errorThrown){
+          }
+      });
+    }
+
+    function deleteInvestmentByProjectId(projectId) {
+        $.ajax({
+          type: "DELETE",
+          url: "http://localhost:3000/investment/investment?projectId=" + projectId,
+          success:(data,textStatus)=>{
+                if (data.status) {
+                }
+          },
+          error: function(XMLHttpRequest, textStatus, errorThrown){
+          }
+      });
+    }
+
+    function removeProjectDom(id) {
+        document.getElementById(id).remove()
+    }
+
+    function showUsers(obj){
+        var _id = obj.getAttribute('data-item');
+        requestUsers(_id)
+    }
+    function enterEditUser(obj) {
+        window.location.href = "investment.html?_id=" + obj.id;
+    }
+
+    function requestUsers(id){
+        $.ajax({
+          type: "GET",
+          url: "http://localhost:3000/investment/investment?projectId=" + id,
+          complete:function(XMLHttpRequest, textStatus){
+
+          },
+          success:(data,textStatus)=>{
+                if (data.status) {
+                    var investments = data.data;
+                    this.investments = investments;
+                    createUserlist(investments)
+                }
+
+          },
+          error: function(XMLHttpRequest, textStatus, errorThrown){
+          }
+      });
+    }
+
+    function createUserlist(investments) {
+        // var dom = document.getElementById("user_" + investments[0]._id);
+        // if(dom){
+        //     dom.remove()
+        // }else{
+            var html='';
+            investments.map((investment )=>{
+                var dom = document.getElementById("user_" + investment._id);
+                if (dom) {
+                    dom.remove()
+                }else{
+                    document.getElementById(investments[0].projectId).innerHTML += (
+                        '<div id='+ "user_" +investment._id+' style="display: flex; justify-content: center; margin:5px 0;">'+
+                            '<div style="flex:1">   </div>'+
+                            '<div style="flex:1" class="userName" data-UserId='+investment.userId+' onclick="enterUserDetail(this)"> <font color=blue>'+ investment.userName +'</font></div>'+
+                            '<div style="flex:1" class="investmentMmount"> '+ investment.investmentMmount +' </div>'+
+                            '<div style="flex:1" class="remitDate"> '+ investment.remitDate +' </div>'+
+                            '<div style="display:flex; flex:1; justify-content: center" class="userName"> '+
+                            '<button class="userName" data-investmentId='+investment._id+' data-UserId='+investment.userId+' data-ProjectId='+investment.projectId+' onclick="deleteInvestor(this)">  删除投资者 </button> </div>'+
+                        '</div>'
+                    )
+                }
+            })
+    }
+
+    function deleteInvestor(obj) {
+        var userId = obj.dataset.userid;
+        var projectId = obj.dataset.projectid;
+        var investmentId = obj.dataset.investmentid;
+        $.ajax({
+          type: "DELETE",
+          url: "http://localhost:3000/investment/investment?projectId=" + projectId+ "&userId=" + userId ,
+          complete:function(XMLHttpRequest, textStatus){
+
+          },
+          success:(data,textStatus)=>{
+                if (data.status) {
+                    removeDeletedUser("user_"+investmentId)
+                }
+
+          },
+          error: function(XMLHttpRequest, textStatus, errorThrown){
+          }
+      });
+    }
+
+    function removeDeletedUser(investmentId) {
+        document.getElementById(investmentId).remove()
+    }
+
+    function enterUserDetail(obj) {
+        var userId = obj.dataset.userid;
+        window.location.href= 'userDetail.html?userId='+ userId;
+    }
+
+    getProjects()
+      function submit(){
+        var project = {};
+        var inputs = Array.from( document.getElementsByClassName('inputContent'));
+        inputs.map((item)=>{
+          console.log(item.value);
+          project[item.id] = item.value;
+        })
+        if (project) {
+          let xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = function() {
+              switch(xhr.readyState) {
+                 case 4 :
+                     if((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304) {
+                         var data = xhr.responseText;
+                        alert(data);
+                    }else {
+                       alert("Request was unsuccessful : " + xhr.status + " " + xhr.statusText);
+                    }
+                    break;
+              }
+          };
+          xhr.open("post", 'http://localhost:3000/api/projects', true);
+          xhr.setRequestHeader("Content-Type","application/json");
+        //   var data = new FormData();
+        //   for(var attr in project) {
+        //       data.append(attr,project[attr]);
+        //  }
+          xhr.send(JSON.stringify(project) );
+        }
+      }
+
+    </script>
+
+    </body>
+</html>
